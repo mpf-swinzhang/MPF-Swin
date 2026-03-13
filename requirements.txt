@@ -1,0 +1,22 @@
+# Swin Transformer Requirements
+# Core dependencies
+timm==0.4.12
+yacs==0.1.8
+pyyaml>=5.4.1
+scipy>=1.7.0
+numpy>=1.21.0
+
+# Image processing
+# Use a more flexible version of opencv-python
+opencv-python>=4.4.0
+# For multi-spectral TIF files
+tifffile>=2020.0.0
+
+# Utilities
+termcolor==1.1.0
+
+# PyTorch (install separately based on your CUDA version)
+# For CUDA 10.2: conda install pytorch==1.8.0 torchvision==0.9.0 cudatoolkit=10.2 -c pytorch
+# For CUDA 11.x: pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+# For CPU only: pip install torch torchvision
+

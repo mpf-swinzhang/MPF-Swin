@@ -1,0 +1,78 @@
+MODEL:
+  TYPE: swinv2
+  NAME: swinv2_base_patch4_window8_256_multimodal_seg
+  MULTIMODAL: True
+  # Use stage-level fusion (MPFModule) - fuse at each stage immediately after extraction
+  # If False, use unified fusion after all stages (original method)
+  USE_STAGE_FUSION: True  # Enable multimodal model
+  NUM_CLASSES: 2
+  DROP_PATH_RATE: 0.2
+  FUSION_NUM_HEADS: 8  # Number of attention heads for fusion
+  FUSION_DROPOUT: 0.1  # Dropout for fusion modules
+  USE_FREQUENCY_FUSION: False  # Enable frequency domain fusion (DWT-based) - Disabled for testing
+  USE_BOUNDARY_ENHANCEMENT: True  # Enable boundary enhancement modules
+  USE_DETAIL_ENHANCEMENT: True  # Enable detail enhancement modules for better fine-grained detail preservation
+  # Loss function configuration
+  LOSS_TYPE: combined_edge  # Options: 'balanced_ce', 'combined', 'combined_focal', 'combined_edge'
+  LOSS_CE_WEIGHT: 0.4  # Weight for Cross-Entropy loss in combined loss
+  LOSS_DICE_WEIGHT: 0.4  # Weight for Dice loss in combined loss
+  LOSS_FOCAL_WEIGHT: 0.15  # Weight for Focal loss (used in combined_focal and combined_edge)
+  LOSS_EDGE_WEIGHT: 0.05  # Weight for Edge loss (only used in combined_edge) - improves boundary/detail accuracy
+  # Separate pretrained weights for optical and SAR branches (recommended for better performance)
+  # Public repo note:
+  # - This repository does NOT ship any `.pth` weights.
+  # - Provide your own weights and set the paths below, or leave them empty to train from scratch.
+  OPTICAL_PRETRAINED: ""   # e.g. "path/to/optical_pretrained.pth"
+  SAR_PRETRAINED: ""       # e.g. "path/to/sar_pretrained.pth"
+  SWINV2:
+    EMBED_DIM: 128
+    DEPTHS: [ 2, 2, 18, 2 ]
+    NUM_HEADS: [ 4, 8, 16, 32 ]
+    WINDOW_SIZE: 8
+    PATCH_SIZE: 4
+    IN_CHANS: 10  # Optical: 10 channels (will be handled separately)
+    MLP_RATIO: 4.0
+    QKV_BIAS: True
+    APE: False
+    PATCH_NORM: True
+    PRETRAINED_WINDOW_SIZES: [0, 0, 0, 0]
+
+DATA:
+  BATCH_SIZE: 8
+  IMG_SIZE: 256
+  DATASET: custom
+  DATA_PATH: data
+  INTERPOLATION: bicubic
+  NUM_WORKERS: 0  # Set to 0 for Windows multiprocessing
+  PIN_MEMORY: True
+
+TRAIN:
+  EPOCHS: 200
+  WARMUP_EPOCHS: 20
+  WEIGHT_DECAY: 0.05
+  BASE_LR: 0.001
+  WARMUP_LR: 5e-7
+  MIN_LR: 5e-6
+  CLIP_GRAD: 5.0
+  ACCUMULATION_STEPS: 1
+  AUTO_RESUME: False
+  USE_CHECKPOINT: False
+  # Early stopping configuration
+  EARLY_STOP_PATIENCE: 30  # Stop training if no improvement for 30 epochs
+  EARLY_STOP_MIN_DELTA: 0.001  # Minimum improvement threshold
+  # Checkpoint saving configuration
+  SAVE_FREQ: 10  # Save checkpoint every 10 epochs
+  KEEP_LAST_N_CHECKPOINTS: 5  # Keep last 5 checkpoints
+  LR_SCHEDULER:
+    NAME: cosine
+    WARMUP_PREFIX: True
+  OPTIMIZER:
+    NAME: adamw
+    EPS: 1e-8
+    BETAS: [0.9, 0.999]
+
+TEST:
+  CROP: True
+  SEQUENTIAL: False
+  SHUFFLE: False
+
