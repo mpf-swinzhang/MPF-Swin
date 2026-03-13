@@ -1,18 +1,18 @@
-# MPF-Swin：Multi-Path Fusion Swin（光学 10 通道 + SAR 3 通道 多模态分割）
+# MPF-Swin: Multi-Path Fusion Swin (Optical 10-channel + SAR 3-channel Multimodal Segmentation)
 
-本仓库提供 **MPF-Swin** 的训练/验证代码：基于 Swin Transformer / SwinV2 的多模态语义分割框架，面向 **光学（10 通道）+ SAR（3 通道）** 的融合分割任务。
+This repository provides training and evaluation code for **MPF-Swin**: a multimodal semantic segmentation framework based on Swin Transformer / SwinV2, designed for **optical (10-channel) + SAR (3-channel)** fusion segmentation tasks.
 
-## 环境安装
+## Environment Setup
 
-建议 Python 3.9+。先安装与你 CUDA 匹配的 PyTorch，然后：
+Python 3.9+ is recommended. First install PyTorch that matches your CUDA version, then:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 数据集目录结构
+## Dataset Directory Structure
 
-公开仓库 **不包含任何数据**。多模态分割数据默认从 `--data-path`（或配置 `DATA.DATA_PATH`）读取，期望结构如下：
+This public repository **does not contain any data**. Multimodal segmentation data are expected to be loaded from `--data-path` (or config `DATA.DATA_PATH`) with the following structure:
 
 ```text
 <DATA_ROOT>/
@@ -20,15 +20,15 @@ pip install -r requirements.txt
   B_sar/                 # SAR images (3-channel), *.tif
   label/                 # segmentation labels, *.tif
   list/
-    train.txt            # 每行一个样本 ID（不含扩展名）
+    train.txt            # one sample ID per line (without file extension)
     val.txt
 ```
 
-说明：`train.txt/val.txt` 中的样本 ID 会用于在 `A_opt/ B_sar/ label/` 下拼接找到对应的 `.tif` 文件。
+Note: sample IDs in `train.txt` / `val.txt` are used to compose corresponding `.tif` file paths under `A_opt/`, `B_sar/`, and `label/`.
 
-## 快速开始（推荐：Windows 单卡）
+## Quick Start (Recommended: Windows, Single GPU)
 
-### 训练（多模态分割，单 GPU）
+### Training (Multimodal Segmentation, Single GPU)
 
 ```bash
 python main_multimodal_seg_single.py ^
@@ -37,7 +37,7 @@ python main_multimodal_seg_single.py ^
   --output output
 ```
 
-### 验证/推理（从 checkpoint）
+### Validation / Inference (from Checkpoint)
 
 ```bash
 python main_multimodal_seg_single.py ^
@@ -47,41 +47,40 @@ python main_multimodal_seg_single.py ^
   --eval
 ```
 
-## 配置与开关
+## Configuration & Options
 
-主要配置文件：
+Main config file:
 
 - `configs/swinv2/swinv2_base_patch4_window8_256_multimodal_seg.yaml`
 
-常用开关（都在配置文件 `MODEL.*` 下）：
+Common options (all under `MODEL.*` in the config file):
 
-- `USE_STAGE_FUSION`：是否启用 **MPF（stage-level fusion）**
-- `USE_BOUNDARY_ENHANCEMENT`：边界增强
-- `USE_DETAIL_ENHANCEMENT`：细节增强
-- `LOSS_TYPE`：`balanced_ce` / `combined` / `combined_focal` / `combined_edge`
+- `USE_STAGE_FUSION`: enable **MPF (stage-level fusion)** or not
+- `USE_BOUNDARY_ENHANCEMENT`: boundary enhancement
+- `USE_DETAIL_ENHANCEMENT`: detail enhancement
+- `LOSS_TYPE`: `balanced_ce` / `combined` / `combined_focal` / `combined_edge`
 
-## 预训练权重（可选）
+## Pretrained Weights (Optional)
 
-本仓库 **不自带任何 `.pth/.ckpt` 权重文件**。如需使用预训练权重，请在配置中设置：
+This repository **does not ship with any `.pth/.ckpt` weight files**. To use pretrained weights, set:
 
 - `MODEL.OPTICAL_PRETRAINED`
 - `MODEL.SAR_PRETRAINED`
 
-不设置也可以从头训练。
+If not set, training from scratch is also supported.
 
-## 目录结构
+## Directory Layout
 
 ```text
-configs/         # YAML 配置
-data/            # 数据加载与增强
-kernels/         # 可选 CUDA/window kernel
-models/          # MPF-Swin 模型实现
-main_*.py        # 训练/验证入口
+configs/         # YAML configs
+data/            # data loading and augmentation
+kernels/         # optional CUDA/window kernels
+models/          # MPF-Swin model implementations
+main_*.py        # training / evaluation entry points
 utils*.py logger.py optimizer.py lr_scheduler.py config.py
 ```
 
 ## License
 
 See `LICENSE`.
-
 
