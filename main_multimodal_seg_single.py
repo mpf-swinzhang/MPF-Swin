@@ -75,7 +75,7 @@ def compute_iou(pred, target, num_classes):
 
 
 def compute_metrics(pred, target, num_classes):
-    """Compute precision, recall, F1 for each class."""
+    """Compute per-class scores, retaining valid zero-valued F1 scores."""
     precisions = []
     recalls = []
     f1_scores = []
@@ -93,7 +93,10 @@ def compute_metrics(pred, target, num_classes):
         
         precision = tp / (tp + fp) if (tp + fp) > 0 else float('nan')
         recall = tp / (tp + fn) if (tp + fn) > 0 else float('nan')
-        f1 = 2 * (precision * recall) / (precision + recall) if not (np.isnan(precision) or np.isnan(recall)) and (precision + recall) > 0 else float('nan')
+        # A complete miss, false-positive-only prediction, or disjoint prediction
+        # has F1=0. Only a class absent from both masks has undefined F1.
+        f1_denominator = 2 * tp + fp + fn
+        f1 = 2 * tp / f1_denominator if f1_denominator > 0 else float('nan')
         
         precisions.append(precision)
         recalls.append(recall)

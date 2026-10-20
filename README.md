@@ -47,6 +47,33 @@ python main_multimodal_seg_single.py ^
   --eval
 ```
 
+### Evaluation Metrics
+
+Training-time validation and `--eval` use the same metric helpers in
+`main_multimodal_seg_single.py`:
+
+- OA and mIoU are calculated per image patch and then averaged with equal
+  patch weights. Patch-level mIoU excludes classes with zero union.
+- Class-wise precision, recall, IoU, and F1 are averaged independently over
+  patches where the corresponding metric is defined.
+- F1 is calculated directly as `2 * TP / (2 * TP + FP + FN)`. When `TP = 0`
+  but `FP + FN > 0`, F1 is **zero and included in the average**. Only when a
+  class is absent from both prediction and reference (`TP = FP = FN = 0`)
+  is its patch-level F1 undefined (`NaN`) and excluded.
+
+This fixes the previous omission of valid zero-valued F1 scores. Historical
+logs are not changed by updating the code; re-evaluate the relevant predictions
+or checkpoints to obtain corrected F1 scores. This entry point does not compute
+Cohen's Kappa or Boundary F1.
+
+Run the metric regression tests without loading data or training a model:
+
+```bash
+python -m unittest discover -s tests -p "test_evaluation_metrics.py" -v
+```
+
+The regression tests require NumPy but do not import the model or CUDA stack.
+
 ## Configuration & Options
 
 Main config file:
