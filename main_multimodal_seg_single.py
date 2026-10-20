@@ -93,7 +93,8 @@ def compute_metrics(pred, target, num_classes):
         
         precision = tp / (tp + fp) if (tp + fp) > 0 else float('nan')
         recall = tp / (tp + fn) if (tp + fn) > 0 else float('nan')
-        f1 = 2 * (precision * recall) / (precision + recall) if not (np.isnan(precision) or np.isnan(recall)) and (precision + recall) > 0 else float('nan')
+        f1_denominator = 2 * tp + fp + fn
+        f1 = 2 * tp / f1_denominator if f1_denominator > 0 else float('nan')
         
         precisions.append(precision)
         recalls.append(recall)
